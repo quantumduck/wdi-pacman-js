@@ -38,53 +38,56 @@ var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 
 var currentBoard = level1Board; // This lets us reset the level if we need to.
 
+var ghostHouseBounds = [20, 34, 12, 16];
+
 
 // Define your ghosts here
 var pacMan = {
   score: 0,
   lives: 2,
   position: [26,23],
+  home: [26,23],
   direction: 'Left',
   sprite: '(V)'
 };
 
 var inky = {
-  menu_option: '1',
   name: 'Inky',
   colour: 'Red',
   character: 'Shadow',
   edible: false,
   position: [26,11],
+  home:[26, 14],
   direction: 'Left',
   sprite: '/I\\'
 };
 var blinky = {
-  menu_option: '2',
   name: 'Blinky',
   colour: 'Cyan',
   character: 'Speedy',
   edible: false,
   position: [22,14],
+  home: [22,14],
   direction: 'Right',
   sprite: '/B\\'
 };
 var pinky = {
-  menu_option: '3',
   name: 'Pinky',
   colour: 'Pink',
   character: 'Bashful',
   edible: false,
   position: [28,14],
+  home: [28,14],
   direction: 'Up',
   sprite: '/P\\'
 };
 var clyde = {
-  menu_option: '4',
   name: 'Clyde',
   colour: 'Orange',
   character: 'Pokey',
   edible: false,
   position: [32,14],
+  home: [32,14],
   direction: 'Left',
   sprite: '/C\\'
 };
@@ -171,16 +174,25 @@ function move(direction, character) {
       newy += 1;
       break;
   }
+
   if (currentBoard[newy][newx] === 'X') {
     // abort the move (wall)
     newx = x;
     newy = y;
+  } else if (currentBoard[newy][newx] === '=') {
+    if (direction != 'Up') {
+      // ghosts can leave, but can't enter ghost house
+      newx = x;
+      newy = y;
+    }
   } else if (newx > 52) {
+    // Warp left
     newx = 2;
   } else if (newx < 2) {
+    // Warp right
     newx = 52;
   }
-  
+
   character.position[0] = newx;
   character.position[1] = newy;
 
@@ -193,7 +205,7 @@ function move(direction, character) {
 
 function eat(x, y) {
   for (var i = 0; i < ghosts.length; i++) {
-    if ((x == ghosts[i].position[0]) && (y == ghosts[i].position[0])) {
+    if ((x === ghosts[i].position[0]) && (y === ghosts[i].position[0])) {
       eatGhost(ghosts[i]);
     }
   }
@@ -226,6 +238,7 @@ function eatGhost(ghost) {
   if (ghost.edible) {
     ghost.edible = false;
     pacMan.score += 200;
+    ghost.position = ghost.home;
     console.log('\nCHOMP!\nYou ate ' + ghost.name + ' (the ' + ghost.character + ' ghost).');
   } else {
     console.log('\nCHOMP!\n' + ghost.name + ' (the ' + ghost.colour + ' one) ate YOU!')
@@ -235,6 +248,10 @@ function eatGhost(ghost) {
 
 function killPacMan() {
   pacMan.lives--;
+  pacMan.position = pacMan.home;
+  for (var i = 0; i < ghosts.length; i++) {
+    ghosts[i].position = ghosts[i].home;
+  }
   if (pacMan.lives < 0) {
     process.exit();
   }
@@ -275,7 +292,6 @@ stdin.resume();
 stdin.setEncoding('utf8');
 
 // Draw screen when game first starts
-// resetBoard();
 drawScreen();
 
 // Process input and draw screen each time player enters a key
