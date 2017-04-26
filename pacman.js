@@ -91,9 +91,10 @@ function eatPowerPellet() {
 function eatGhost(ghost) {
   if (ghost.edible) {
     ghost.edible = false;
-    console.log('\nCHOMP!');
+    score += 200;
+    console.log('\nCHOMP!\nYou ate ' + ghost.name + ' (the ' + ghost.character + ' ghost).');
   } else {
-    console.log('\nCHOMP!\n' + ghost.name + '(the ' + ghost.colour + ' one) eats YOU!')
+    console.log('\nCHOMP!\n' + ghost.name + ' (the ' + ghost.colour + ' one) ate YOU!')
     killPacMan();
   }
 }
