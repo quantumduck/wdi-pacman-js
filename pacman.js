@@ -1,7 +1,6 @@
 // Setup initial game stats
 // var powerPellets = 4;
 
-
 // strings are 55 chars. There are 31 lines
 // This means positions can go from 1 to 26 in x and 1 to 29 in y
 var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -40,6 +39,20 @@ var currentBoard = level1Board; // This lets us reset the level if we need to.
 
 var ghostHouseBounds = [20, 34, 12, 16];
 
+// var corners = [
+//   { x:  2, y:  1, Up: 'Right', Left: 'Down' },
+//   { x: 24, y:  1, Up: 'Left', Right: 'Down' },
+//   { x: 30, y:  1, Up: 'Right', Left: 'Down' },
+//   { x: 52, y:  1, Up: 'Left', Right: 'Down' },
+//   { x: 24, y:  8, Up: 'Left', Right: 'Down' },
+//   { x: 30, y:  8, Up: 'Right', Left: 'Down' },
+//   { x: 18, y:}
+// ]
+//
+//
+// var forks = {
+//
+// }
 
 // Define your ghosts here
 var pacMan = {
@@ -57,7 +70,8 @@ var inky = {
   character: 'Shadow',
   edible: false,
   position: [26,11],
-  home:[26, 14],
+  home: [26, 14],
+  target: [48, -2],
   direction: 'Left',
   sprite: '/I\\'
 };
@@ -68,6 +82,7 @@ var blinky = {
   edible: false,
   position: [22,14],
   home: [22,14],
+  target: [54, 32],
   direction: 'Right',
   sprite: '/B\\'
 };
@@ -78,6 +93,7 @@ var pinky = {
   edible: false,
   position: [28,14],
   home: [28,14],
+  target: [6, -2],
   direction: 'Up',
   sprite: '/P\\'
 };
@@ -88,6 +104,7 @@ var clyde = {
   edible: false,
   position: [32,14],
   home: [32,14],
+  target: [0, 32],
   direction: 'Left',
   sprite: '/C\\'
 };
@@ -109,7 +126,9 @@ function clearScreen() {
 }
 
 function displayStats() {
-  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives);
+  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives + '   Position:' + pacMan.position [0] + ',' + pacMan.position[1]);
+  // console.log(ghosts[0].name + '\'s Position:' + ghosts[0].position [0] + ',' + ghosts[0].position[1]);
+
   // console.log('\nPower-Pellets: ' + powerPellets)
 }
 
@@ -160,6 +179,7 @@ function move(direction, character) {
   var y = character.position[1];
   var newx = x;
   var newy = y;
+  var success = true;
   switch (direction) {
     case 'Left':
       newx -= 2;
@@ -179,11 +199,13 @@ function move(direction, character) {
     // abort the move (wall)
     newx = x;
     newy = y;
+    success = false;
   } else if (currentBoard[newy][newx] === '=') {
     if (direction != 'Up') {
       // ghosts can leave, but can't enter ghost house
       newx = x;
       newy = y;
+      success = false;
     }
   } else if (newx > 52) {
     // Warp left
@@ -195,17 +217,14 @@ function move(direction, character) {
 
   character.position[0] = newx;
   character.position[1] = newy;
-
-  if (character === pacMan) {
-    eat(newx, newy);
-  } else if ((newx == pacMan.position[0]) && (newy == pacMan.position[0])) {
-    eatGhost(character); // Call eat on ghost
-  }
+  return success;
 }
 
-function eat(x, y) {
+function eat(position) {
+  var x = position[0];
+  var y = position[1];
   for (var i = 0; i < ghosts.length; i++) {
-    if ((x === ghosts[i].position[0]) && (y === ghosts[i].position[0])) {
+    if ((x === ghosts[i].position[0]) && (y === ghosts[i].position[1])) {
       eatGhost(ghosts[i]);
     }
   }
@@ -215,13 +234,15 @@ function eat(x, y) {
       eatPowerPellet();
     case 'o':
       pacMan.score += 10;
-      eatDot(x, y);
+      eatDot(position);
       break;
     default:
   }
 }
 
-function eatDot(x, y) {
+function eatDot(position) {
+  var x = position[0];
+  var y = position[1];
   console.log('\nChomp!');
   currentBoard[y] = currentBoard[y].substring(0,x)
                   + ' '
@@ -257,6 +278,12 @@ function killPacMan() {
   }
 }
 
+// Ghost AI:
+
+function ghostMove(ghost) {
+  target = ghost.targer;
+}
+
 // Process Player's Input
 function processInput(key) {
   switch(key) {
@@ -265,16 +292,24 @@ function processInput(key) {
       process.exit();
       break;
     case 'a':
-      move('Left', pacMan);
+      if (move('Left', pacMan)) {
+        eat(pacMan.position);
+      }
       break;
     case 'd':
-      move('Right', pacMan);
+    if (move('Right', pacMan)) {
+      eat(pacMan.position);
+    }
       break;
     case 'w':
-      move('Up', pacMan);
+    if (move('Up', pacMan)) {
+      eat(pacMan.position);
+    }
       break;
     case 's':
-      move('Down', pacMan);
+      if (move('Down', pacMan)) {
+        eat(pacMan.position);
+      }
       break;
     default:
       console.log('\nInvalid Command!');
