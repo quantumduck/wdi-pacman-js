@@ -39,17 +39,7 @@ var currentBoard = level1Board; // This lets us reset the level if we need to.
 
 var ghostHouseBounds = [20, 34, 12, 16];
 
-// var corners = [
-//   { x:  2, y:  1, Up: 'Right', Left: 'Down' },
-//   { x: 24, y:  1, Up: 'Left', Right: 'Down' },
-//   { x: 30, y:  1, Up: 'Right', Left: 'Down' },
-//   { x: 52, y:  1, Up: 'Left', Right: 'Down' },
-//   { x: 24, y:  8, Up: 'Left', Right: 'Down' },
-//   { x: 30, y:  8, Up: 'Right', Left: 'Down' },
-//   { x: 18, y:}
-// ]
-//
-//
+
 // var forks = {
 //
 // }
@@ -281,7 +271,36 @@ function killPacMan() {
 // Ghost AI:
 
 function ghostMove(ghost) {
-  target = ghost.targer;
+  target = ghost.target;
+  while (!move(ghost)) {
+    ghost.direction = rotateClockwise(ghost.direction);
+  }
+}
+
+function changeDirection(direction) {
+  switch(direction) {
+    case 'Left':
+      return 'Up';
+    case 'Up':
+      return 'Right';
+    case 'Right':
+      return 'Down';
+    case 'Down':
+      return 'Left';
+  }
+}
+
+function reverse(direction) {
+  switch(direction) {
+    case 'Left':
+      return 'Right';
+    case 'Up':
+      return 'Down';
+    case 'Right':
+      return 'Left';
+    case 'Down':
+      return 'Up';
+  }
 }
 
 // Process Player's Input
