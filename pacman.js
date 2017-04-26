@@ -113,13 +113,23 @@ function displayStats() {
 function displayBoard() {
   for (var y = 0; y < currentBoard.length; y++) {
     line = currentBoard[y];
+    for (var i = 0; i < ghosts.length; i++) {
+      if (ghosts[i].position[1] == y) {
+        line = insertCharacter(line, ghosts[i]);
+      }
+    }
     if (pacMan.position[1] == y) {
-      line = line.substring(0, pacMan.position[0] - 1)
-           + pacMan.sprite
-           + line.substring(pacMan.position[0] + 2, line.length);
+      line = insertCharacter(line, pacMan);
     }
     console.log(line);
   }
+}
+
+
+function insertCharacter(line, character) {
+  return line.substring(0, character.position[0] - 1)
+       + character.sprite
+       + line.substring(character.position[0] + 2, line.length);
 }
 
 function displayMenu() {
