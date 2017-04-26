@@ -11,27 +11,28 @@ var inky = {
   character: 'Shadow',
   edible: false
 };
-var inky = {
-  menu_option: '1',
+var blinky = {
+  menu_option: '2',
   name: 'Blinky',
   colour: 'Cyan',
   character: 'Speedy',
   edible: false
 };
-var inky = {
-  menu_option: '1',
+var pinky = {
+  menu_option: '3',
   name: 'Pinky',
   colour: 'Pink',
   character: 'Bashful',
   edible: false
 };
-var inky = {
-  menu_option: '1',
+var clyde = {
+  menu_option: '4',
   name: 'Clyde',
   colour: 'Orange',
   character: 'Pokey',
   edible: false
 };
+var ghosts = [inky, blinky, pinky, clyde];
 
 // Draw the screen functionality
 function drawScreen() {
@@ -54,6 +55,10 @@ function displayStats() {
 function displayMenu() {
   console.log('\n\nSelect Option:\n');  // each \n creates a new line
   console.log('(d) Eat Dot');
+  console.log('(1) Eat Inky');
+  console.log('(2) Eat Blinky');
+  console.log('(3) Eat Pinky');
+  console.log('(4) Eat Clyde');
   console.log('(q) Quit');
 }
 
@@ -69,6 +74,18 @@ function eatDot() {
   score += 10;
 }
 
+function eatGhost(ghost) {
+  if (ghost.edible) {
+    console.log('\nCHOMP!');
+  } else {
+    console.log('\nCHOMP!\n' + ghost.name + '(the ' + ghost.colour + ' one) eats YOU!')
+    lives--;
+    if (lives < 0) {
+      process.exit();
+    }
+  }
+}
+
 
 // Process Player's Input
 function processInput(key) {
@@ -79,6 +96,18 @@ function processInput(key) {
       break;
     case 'd':
       eatDot();
+      break;
+    case inky.menu_option:
+      eatGhost(inky);
+      break;
+    case blinky.menu_option:
+      eatGhost(blinky);
+      break;
+    case pinky.menu_option:
+      eatGhost(pinky);
+      break;
+    case clyde.menu_option:
+      eatGhost(clyde);
       break;
     default:
       console.log('\nInvalid Command!');
