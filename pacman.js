@@ -10,32 +10,28 @@ var inky = {
   name: 'Inky',
   colour: 'Red',
   character: 'Shadow',
-  edible: false,
-  eaten: false
+  edible: false
 };
 var blinky = {
   menu_option: '2',
   name: 'Blinky',
   colour: 'Cyan',
   character: 'Speedy',
-  edible: false,
-  eaten: false
+  edible: false
 };
 var pinky = {
   menu_option: '3',
   name: 'Pinky',
   colour: 'Pink',
   character: 'Bashful',
-  edible: false,
-  eaten: false
+  edible: false
 };
 var clyde = {
   menu_option: '4',
   name: 'Clyde',
   colour: 'Orange',
   character: 'Pokey',
-  edible: false,
-  eaten: false
+  edible: false
 };
 var ghosts = [inky, blinky, pinky, clyde];
 
@@ -64,10 +60,10 @@ function displayMenu() {
   if (powerPellets > 0) {
     console.log('(p) Eat Power-Pellet')
   }
-  console.log('(1) Eat Inky');
-  console.log('(2) Eat Blinky');
-  console.log('(3) Eat Pinky');
-  console.log('(4) Eat Clyde');
+  console.log('(1) Eat Inky (' + (inky.edible ? 'edible' : 'inedible') + ')');
+  console.log('(2) Eat Blinky (' + (blinky.edible ? 'edible' : 'inedible') + ')');
+  console.log('(3) Eat Pinky (' + (pinky.edible ? 'edible' : 'inedible') + ')');
+  console.log('(4) Eat Clyde (' + (clyde.edible ? 'edible' : 'inedible') + ')');
   console.log('(q) Quit');
 }
 
@@ -94,7 +90,7 @@ function eatPowerPellet() {
 
 function eatGhost(ghost) {
   if (ghost.edible) {
-    ghost.eaten = true;
+    ghost.edible = false;
     console.log('\nCHOMP!');
   } else {
     console.log('\nCHOMP!\n' + ghost.name + '(the ' + ghost.colour + ' one) eats YOU!')
