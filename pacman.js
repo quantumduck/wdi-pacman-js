@@ -1,37 +1,91 @@
 // Setup initial game stats
-var score = 0;
-var lives = 2;
 var powerPellets = 4;
 
 
+// strings are 55 chars. There are 31 lines
+// This means positions can go from 1 to 26 in x and 1 to 29 in y
+var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                   "X o o o o o o o o o o o o XXX o o o o o o o o o o o o X",
+                   "X o XXXXXXX o XXXXXXXXX o XXX o XXXXXXXXX o XXXXXXX o X",
+                   "X @ XXXXXXX o XXXXXXXXX o XXX o XXXXXXXXX o XXXXXXX @ X",
+                   "X o XXXXXXX o XXXXXXXXX o XXX o XXXXXXXXX o XXXXXXX o X",
+                   "X o o o o o o o o o o o o o o o o o o o o o o o o o o X",
+                   "X o XXXXXXX o XXX o XXXXXXXXXXXXXXX o XXX o XXXXXXX o X",
+                   "X o XXXXXXX o XXX o XXXXXXXXXXXXXXX o XXX o XXXXXXX o X",
+                   "X o o o o o o XXX o o o o XXX o o o o XXX o o o o o o X",
+                   "XXXXXXXXXXX o XXXXXXXXX   XXX   XXXXXXXXX o XXXXXXXXXXX",
+                   "          X o XXXXXXXXX   XXX   XXXXXXXXX o X          ",
+                   "          X o XXX                     XXX o X          ",
+                   "          X o XXX   XXXXXX===XXXXXX   XXX o X          ",
+                   "XXXXXXXXXXX o XXX   X             X   XXX o XXXXXXXXXXX",
+                   "            o       X             X       o            ",
+                   "XXXXXXXXXXX o XXX   X             X   XXX o XXXXXXXXXXX",
+                   "          X o XXX   XXXXXXXXXXXXXXX   XXX o X          ",
+                   "          X o XXX                     XXX o X          ",
+                   "          X o XXX   XXXXXXXXXXXXXXX   XXX o X          ",
+                   "XXXXXXXXXXX o XXX   XXXXXXXXXXXXXXX   XXX o XXXXXXXXXXX",
+                   "X o o o o o o o o o o o o XXX o o o o o o o o o o o o X",
+                   "X o XXXXXXX o XXXXXXXXX o XXX o XXXXXXXXX o XXXXXXX o X",
+                   "X o XXXXXXX o XXXXXXXXX o XXX o XXXXXXXXX o XXXXXXX o X",
+                   "X @ o o XXX o o o o o o o     o o o o o o o XXX o o @ X",
+                   "XXXXX o XXX o XXX o XXXXXXXXXXXXXXX o XXX o XXX o XXXXX",
+                   "XXXXX o XXX o XXX o XXXXXXXXXXXXXXX o XXX o XXX o XXXXX",
+                   "X o o o o o o XXX o o o o XXX o o o o XXX o o o o o o X",
+                   "X o XXXXXXXXXXXXXXXXXXX o XXX o XXXXXXXXXXXXXXXXXXX o X",
+                   "X o XXXXXXXXXXXXXXXXXXX o XXX o XXXXXXXXXXXXXXXXXXX o X",
+                   "X o o o o o o o o o o o o o o o o o o o o o o o o o o X",
+                   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"];
+
+var currentBoard;
+
 // Define your ghosts here
+var pacMan = {
+  score: 0,
+  lives: 2,
+  position: [26,23],
+  direction: 'Left',
+  sprite: '(V)'
+};
+
 var inky = {
   menu_option: '1',
   name: 'Inky',
   colour: 'Red',
   character: 'Shadow',
-  edible: false
+  edible: false,
+  position: [26,11],
+  direction: 'Left',
+  sprite: '/I\\'
 };
 var blinky = {
   menu_option: '2',
   name: 'Blinky',
   colour: 'Cyan',
   character: 'Speedy',
-  edible: false
+  edible: false,
+  position: [22,14],
+  direction: 'Right',
+  sprite: '/B\\'
 };
 var pinky = {
   menu_option: '3',
   name: 'Pinky',
   colour: 'Pink',
   character: 'Bashful',
-  edible: false
+  edible: false,
+  position: [28,14],
+  direction: 'Up',
+  sprite: '/P\\'
 };
 var clyde = {
   menu_option: '4',
   name: 'Clyde',
   colour: 'Orange',
   character: 'Pokey',
-  edible: false
+  edible: false,
+  position: [32,14],
+  direction: 'Left',
+  sprite: '/C\\'
 };
 var ghosts = [inky, blinky, pinky, clyde];
 
@@ -40,6 +94,7 @@ function drawScreen() {
   clearScreen();
   setTimeout(function() {
     displayStats();
+    // displayBoard();
     displayMenu();
     displayPrompt();
   }, 10);
@@ -50,8 +105,8 @@ function clearScreen() {
 }
 
 function displayStats() {
-  console.log('Score: ' + score + '     Lives: ' + lives);
-  console.log('\nPower-Pellets: ' + powerPellets)
+  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives);
+  // console.log('\nPower-Pellets: ' + powerPellets)
 }
 
 function displayMenu() {
@@ -76,12 +131,12 @@ function displayPrompt() {
 // Menu Options
 function eatDot() {
   console.log('\nChomp!');
-  score += 10;
+  pacMan.score += 10;
 }
 
 function eatPowerPellet() {
   powerPellets--;
-  score += 50;
+  pacMan.score += 50;
   for(var i = 0; i < ghosts.length; i++) {
     ghosts[i].edible = true;
   }
@@ -91,7 +146,7 @@ function eatPowerPellet() {
 function eatGhost(ghost) {
   if (ghost.edible) {
     ghost.edible = false;
-    score += 200;
+    pacMan.score += 200;
     console.log('\nCHOMP!\nYou ate ' + ghost.name + ' (the ' + ghost.character + ' ghost).');
   } else {
     console.log('\nCHOMP!\n' + ghost.name + ' (the ' + ghost.colour + ' one) ate YOU!')
@@ -100,8 +155,8 @@ function eatGhost(ghost) {
 }
 
 function killPacMan() {
-  lives--;
-  if (lives < 0) {
+  pacMan.lives--;
+  if (pacMan.lives < 0) {
     process.exit();
   }
 }
