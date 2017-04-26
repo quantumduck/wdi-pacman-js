@@ -36,7 +36,8 @@ var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
                    "X o o o o o o o o o o o o o o o o o o o o o o o o o o X",
                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"];
 
-var currentBoard;
+var currentBoard = level1Board; // This lets us reset the level if we need to.
+
 
 // Define your ghosts here
 var pacMan = {
@@ -94,7 +95,7 @@ function drawScreen() {
   clearScreen();
   setTimeout(function() {
     displayStats();
-    // displayBoard();
+    displayBoard();
     displayMenu();
     displayPrompt();
   }, 10);
@@ -109,17 +110,26 @@ function displayStats() {
   // console.log('\nPower-Pellets: ' + powerPellets)
 }
 
-function displayMenu() {
-  console.log('\n\nSelect Option:\n');  // each \n creates a new line
-  console.log('(d) Eat Dot');
-  if (powerPellets > 0) {
-    console.log('(p) Eat Power-Pellet')
+function displayBoard() {
+  for (var y = 0; y < currentBoard.length; y++) {
+    line = currentBoard[y];
+    if (pacMan.position[1] == y) {
+      line = line.substring(0, pacMan.position[0] - 1)
+           + pacMan.sprite
+           + line.substring(pacMan.position[0] + 2, line.length);
+    }
+    console.log(line);
   }
-  console.log('(1) Eat Inky (' + (inky.edible ? 'edible' : 'inedible') + ')');
-  console.log('(2) Eat Blinky (' + (blinky.edible ? 'edible' : 'inedible') + ')');
-  console.log('(3) Eat Pinky (' + (pinky.edible ? 'edible' : 'inedible') + ')');
-  console.log('(4) Eat Clyde (' + (clyde.edible ? 'edible' : 'inedible') + ')');
-  console.log('(q) Quit');
+}
+
+function displayMenu() {
+  console.log('\nCommands:\n');  // each \n creates a new line
+  console.log('a: left; d: right; w: up; s: down; q: quit.');
+  // console.log('(1) Eat Inky (' + (inky.edible ? 'edible' : 'inedible') + ')');
+  // console.log('(2) Eat Blinky (' + (blinky.edible ? 'edible' : 'inedible') + ')');
+  // console.log('(3) Eat Pinky (' + (pinky.edible ? 'edible' : 'inedible') + ')');
+  // console.log('(4) Eat Clyde (' + (clyde.edible ? 'edible' : 'inedible') + ')');
+  // console.log('(q) Quit');
 }
 
 function displayPrompt() {
@@ -205,6 +215,7 @@ stdin.resume();
 stdin.setEncoding('utf8');
 
 // Draw screen when game first starts
+// resetBoard();
 drawScreen();
 
 // Process input and draw screen each time player enters a key
