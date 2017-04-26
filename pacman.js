@@ -1,5 +1,5 @@
 // Setup initial game stats
-var powerPellets = 4;
+// var powerPellets = 4;
 
 
 // strings are 55 chars. There are 31 lines
@@ -147,41 +147,79 @@ function displayPrompt() {
   process.stdout.write('\nWaka Waka :v '); // :v is the Pac-Man emoji.
 }
 
-function goLeft(character) {
-  var x = character.position[0];
-  var y = character.position[1];
-  if (x <= 2) {
-    // warp to the right!
-    character.position[0] = 52;
-  } else if (currentBoard[y][x - 2] === 'X') {
-    // Do nothing (wall)
-  } else {
-    character.position[0] -= 2; // go left two spaces
-  }
-  // switch (currentBoard[character.position[1]][character.position[0]]) {
-  //   case 'o':
-  //     eatDot();
-  //     break;
-  //   case '@':
-  //     eatPowerPellet();
-  //     break;
-  //   default:
-  // }
-}
+
 
 // Menu Options
-function eatDot() {
+
+function move(direction, character) {
+  character.direction = direction;
+  var x = character.position[0];
+  var y = character.position[1];
+  var newx = x;
+  var newy = y;
+  switch (direction) {
+    case 'Left':
+      newx -= 2;
+      break;
+    case 'Right':
+      newx += 2;
+      break;
+    case 'Up':
+      newy -= 1;
+      break;
+    case 'Down':
+      newy += 1;
+      break;
+  }
+  if (currentBoard[newy][newx] === 'X') {
+    // abort the move (wall)
+    newx = x;
+    newy = y;
+  } else if (newx > 52) {
+    newx = 2;
+  } else if (newx < 2) {
+    newx = 52;
+  }
+  
+  character.position[0] = newx;
+  character.position[1] = newy;
+
+  if (character === pacMan) {
+    eat(newx, newy);
+  } else if ((newx == pacMan.position[0]) && (newy == pacMan.position[0])) {
+    eatGhost(character); // Call eat on ghost
+  }
+}
+
+function eat(x, y) {
+  for (var i = 0; i < ghosts.length; i++) {
+    if ((x == ghosts[i].position[0]) && (y == ghosts[i].position[0])) {
+      eatGhost(ghosts[i]);
+    }
+  }
+  switch (currentBoard[y][x]) {
+    case '@':
+      pacMan.score += 40;
+      eatPowerPellet();
+    case 'o':
+      pacMan.score += 10;
+      eatDot(x, y);
+      break;
+    default:
+  }
+}
+
+function eatDot(x, y) {
   console.log('\nChomp!');
-  pacMan.score += 10;
+  currentBoard[y] = currentBoard[y].substring(0,x)
+                  + ' '
+                  + currentBoard[y].substring(x + 1, currentBoard[y].length);
 }
 
 function eatPowerPellet() {
-  powerPellets--;
-  pacMan.score += 50;
   for(var i = 0; i < ghosts.length; i++) {
     ghosts[i].edible = true;
   }
-  console.log('\nChomp!');
 }
 
 function eatGhost(ghost) {
@@ -210,16 +248,16 @@ function processInput(key) {
       process.exit();
       break;
     case 'a':
-      goLeft(pacMan);
+      move('Left', pacMan);
       break;
     case 'd':
-      goRight(pacMan);
+      move('Right', pacMan);
       break;
     case 'w':
-      goUp(pacMan);
+      move('Up', pacMan);
       break;
     case 's':
-      goDown(pacMan);
+      move('Down', pacMan);
       break;
     default:
       console.log('\nInvalid Command!');
