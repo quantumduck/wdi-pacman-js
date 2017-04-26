@@ -112,7 +112,7 @@ function displayStats() {
 
 function displayBoard() {
   for (var y = 0; y < currentBoard.length; y++) {
-    line = currentBoard[y];
+    var line = currentBoard[y];
     for (var i = 0; i < ghosts.length; i++) {
       if (ghosts[i].position[1] == y) {
         line = insertCharacter(line, ghosts[i]);
@@ -147,6 +147,27 @@ function displayPrompt() {
   process.stdout.write('\nWaka Waka :v '); // :v is the Pac-Man emoji.
 }
 
+function goLeft(character) {
+  var x = character.position[0];
+  var y = character.position[1];
+  if (x <= 2) {
+    // warp to the right!
+    character.position[0] = 52;
+  } else if (currentBoard[y][x - 2] === 'X') {
+    // Do nothing (wall)
+  } else {
+    character.position[0] -= 2; // go left two spaces
+  }
+  // switch (currentBoard[character.position[1]][character.position[0]]) {
+  //   case 'o':
+  //     eatDot();
+  //     break;
+  //   case '@':
+  //     eatPowerPellet();
+  //     break;
+  //   default:
+  // }
+}
 
 // Menu Options
 function eatDot() {
@@ -188,31 +209,22 @@ function processInput(key) {
     case 'q':
       process.exit();
       break;
+    case 'a':
+      goLeft(pacMan);
+      break;
     case 'd':
-      eatDot();
+      goRight(pacMan);
       break;
-    case inky.menu_option:
-      eatGhost(inky);
+    case 'w':
+      goUp(pacMan);
       break;
-    case blinky.menu_option:
-      eatGhost(blinky);
+    case 's':
+      goDown(pacMan);
       break;
-    case pinky.menu_option:
-      eatGhost(pinky);
-      break;
-    case clyde.menu_option:
-      eatGhost(clyde);
-      break;
-    case 'p':
-      if (powerPellets > 0) {
-        eatPowerPellet();
-        break;
-      }
     default:
       console.log('\nInvalid Command!');
   }
 }
-
 
 //
 // YOU PROBABLY DON'T WANT TO CHANGE CODE BELOW THIS LINE
