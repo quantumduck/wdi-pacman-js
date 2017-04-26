@@ -40,9 +40,9 @@ var currentBoard = level1Board; // This lets us reset the level if we need to.
 var ghostHouseBounds = [20, 34, 12, 16];
 
 
-// var forks = {
-//
-// }
+var forks = [
+  { position: [12,1], Left:
+];
 
 // Define your ghosts here
 var pacMan = {
@@ -163,13 +163,10 @@ function displayPrompt() {
 
 // Menu Options
 
-function move(direction, character) {
-  character.direction = direction;
-  var x = character.position[0];
-  var y = character.position[1];
+function nextPosition(x, y, direction) {
   var newx = x;
   var newy = y;
-  var success = true;
+  var youSee = 'nothing';
   switch (direction) {
     case 'Left':
       newx -= 2;
@@ -184,19 +181,17 @@ function move(direction, character) {
       newy += 1;
       break;
   }
-
   if (currentBoard[newy][newx] === 'X') {
     // abort the move (wall)
     newx = x;
     newy = y;
-    success = false;
-  } else if (currentBoard[newy][newx] === '=') {
+  }
+  else if (currentBoard[newy][newx] === '=') {
     if (direction != 'Up') {
       // ghosts can leave, but can't enter ghost house
       newx = x;
       newy = y;
-      success = false;
-    }
+     }
   } else if (newx > 52) {
     // Warp left
     newx = 2;
@@ -204,10 +199,14 @@ function move(direction, character) {
     // Warp right
     newx = 52;
   }
+  return [newx, newy];
+}
 
-  character.position[0] = newx;
-  character.position[1] = newy;
-  return success;
+function move(character) {
+  var direction = character.direction;
+  var x = character.position[0];
+  var y = character.position[1];
+  character.position = nextPosition(x, y, direction);
 }
 
 function eat(position) {
@@ -271,13 +270,13 @@ function killPacMan() {
 // Ghost AI:
 
 function ghostMove(ghost) {
-  target = ghost.target;
+  var target = ghost.target;
   while (!move(ghost)) {
     ghost.direction = rotateClockwise(ghost.direction);
   }
 }
 
-function changeDirection(direction) {
+function rotateClockwise(direction) {
   switch(direction) {
     case 'Left':
       return 'Up';
@@ -303,6 +302,17 @@ function reverse(direction) {
   }
 }
 
+function ghostDecide(position, target, directions) {
+  var choice = directions[0];
+  var px = position[0];
+  var py = position[1];
+  var tx = target[0];
+  var ty = target[1];
+  for (var i = 1; i < directions.length; i++) {
+    
+  }
+}
+
 // Process Player's Input
 function processInput(key) {
   switch(key) {
@@ -311,22 +321,26 @@ function processInput(key) {
       process.exit();
       break;
     case 'a':
-      if (move('Left', pacMan)) {
+      pacMan.direction = 'Left';
+      if (move(pacMan)) {
         eat(pacMan.position);
       }
       break;
     case 'd':
-    if (move('Right', pacMan)) {
-      eat(pacMan.position);
-    }
+    pacMan.direction = 'Right';
+      if (move(pacMan)) {
+        eat(pacMan.position);
+      }
       break;
     case 'w':
-    if (move('Up', pacMan)) {
-      eat(pacMan.position);
-    }
+      pacMan.direction = 'Up';
+      if (move(pacMan)) {
+        eat(pacMan.position);
+      }
       break;
     case 's':
-      if (move('Down', pacMan)) {
+    pacMan.direction = 'Down';
+      if (move(pacMan)) {
         eat(pacMan.position);
       }
       break;
