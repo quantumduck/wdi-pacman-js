@@ -1,6 +1,9 @@
-// Setup initial game stats
-// var powerPellets = 4;
-var globalchoices;
+var paused = false;
+var dotsLeft = 240;
+var powerPellets = 4;
+var ghostsEaten = 0;
+var fruitThresholds = [170, 100];
+var level = 1;
 // strings are 55 chars. There are 31 lines
 // This means positions can go from 1 to 26 in x and 1 to 29 in y
 var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -95,6 +98,62 @@ var clyde = {
 };
 var ghosts = [inky, blinky, pinky, clyde];
 
+var cherry = {
+  name: 'Cherry',
+  position: [28, 17],
+  points: 100,
+  sprite: '<8 '
+};
+var strawberry = {
+  name: 'Strawberry',
+  position: [28, 17],
+  points: 300,
+  sprite: '<+ '
+};
+var orange = {
+  name: 'Orange',
+  position: [28, 17],
+  points: 500,
+  sprite: ' 0 '
+};
+var apple = {
+  name: 'Apple',
+  position: [28, 17],
+  points: 700,
+  sprite: ' Q '
+};
+var pineapple = {
+  name: 'Pineapple',
+  position: [28, 17],
+  points: 1000,
+  sprite: '>DD'
+};
+var spaceship = {
+  name: 'Galaxian Spaceship',
+  position: [28, 17],
+  points: 2000,
+  sprite: '-A-'
+};
+var bell = {
+  name: 'Bell',
+  position: [28, 17],
+  points: 3000,
+  sprite: '--c'
+};
+var key = {
+  name: 'Key',
+  position: [28, 17],
+  points: 5000,
+  sprite: 'qp '
+};
+var none = {
+  name: 'Nothing',
+  position: [28,17],
+  points: 0,
+  sprite: '   '
+};
+var bonuses = [none, cherry, strawberry, orange, orange, apple, apple, pineapple, pineapple, spaceship, spaceship, bell, bell, key];
+
 // Draw the screen functionality
 function drawScreen() {
   clearScreen();
@@ -111,7 +170,7 @@ function clearScreen() {
 }
 
 function displayStats() {
-  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives);
+  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives + '  Dots: ' + dotsLeft + '  Level: ' + level);
   // console.log(ghosts[0].name + '\'s Position:' + ghosts[0].position [0] + ',' + ghosts[0].position[1]);
 
   // console.log('\nPower-Pellets: ' + powerPellets)
@@ -141,7 +200,7 @@ function insertCharacter(line, character) {
 
 function displayMenu() {
   console.log('\nCommands:\n');  // each \n creates a new line
-  console.log('a: left; d: right; w: up; s: down; q: quit.');
+  console.log('a: left, d: right, w: up, s: down, q: quit.');
   // console.log('(1) Eat Inky (' + (inky.edible ? 'edible' : 'inedible') + ')');
   // console.log('(2) Eat Blinky (' + (blinky.edible ? 'edible' : 'inedible') + ')');
   // console.log('(3) Eat Pinky (' + (pinky.edible ? 'edible' : 'inedible') + ')');
@@ -231,6 +290,15 @@ function eatDot(position) {
   currentBoard[y] = currentBoard[y].substring(0,x)
                   + ' '
                   + currentBoard[y].substring(x + 1, currentBoard[y].length);
+  dotsLeft--;
+  if ((dotsLeft === 0) && (powerPellets === 0 )) {
+    levelUp();
+  }
+  for (var i = 0; i < fruitThresholds.length; i++) {
+    if (dotsLeft === fruitThresholds[i]) {
+      addFruit();
+    }
+  }
 }
 
 function eatPowerPellet() {
@@ -238,14 +306,18 @@ function eatPowerPellet() {
     ghosts[i].edible = true;
     ghosts[i].direction = reverse(ghosts[i].direction);
   }
+  powerPellets--;
+  dotsLeft++; // fix for counting error.
 }
 
 function eatGhost(ghost) {
   if (ghost.edible) {
     ghost.edible = false;
-    pacMan.score += 200;
+    pacMan.score += Math.pow(2,ghostsEaten) * 100;
+    ghostsEaten++;
     ghost.position = ghost.home;
     console.log('\nCHOMP!\nYou ate ' + ghost.name + ' (the ' + ghost.character + ' ghost).');
+    ghostsEaten++;
   } else {
     console.log('\nCHOMP!\n' + ghost.name + ' (the ' + ghost.colour + ' one) ate YOU!')
     killPacMan();
@@ -261,6 +333,28 @@ function killPacMan() {
   if (pacMan.lives < 0) {
     process.exit();
   }
+}
+
+function levelUp() {
+  currentBoard = level1Board;
+  level++;
+  pacMan.position = pacMan.home;
+  for (i = 1; i < ghosts.length; i++) {
+    ghost[i].position = ghost.home;
+  }
+  inky.position = [26, 11];
+  inky.direction = 'Left';
+}
+
+function addFruit() {
+  var fruit;
+  if (level >= 13) {
+    fruit = key;
+  } else {
+    fruit = bonuses[level];
+  }
+  var line_num = fruit.position[1];
+  currentBoard[line_num] = insertCharacter(currentBoard[line_num], fruit);
 }
 
 // Ghost AI:
@@ -419,7 +513,7 @@ function findForks(position, direction) {
         break;
   }
   globalchoices = choices;
-  console.log(choices);
+  // console.log(choices);
   return choices;
 }
 // Process Player's Input
@@ -475,7 +569,7 @@ drawScreen();
 stdin.on('data', function(key) {
   process.stdout.write(key);
   processInput(key);
-  setTimeout(drawScreen, 300); // The command prompt will flash a message for 300 milliseoncds before it re-draws the screen. You can adjust the 300 number to increase this.
+  setTimeout(drawScreen, 10); // The command prompt will flash a message for 300 milliseoncds before it re-draws the screen. You can adjust the 300 number to increase this.
 });
 
 // Player Quits
