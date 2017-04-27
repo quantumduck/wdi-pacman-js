@@ -1,6 +1,6 @@
 // Setup initial game stats
 // var powerPellets = 4;
-
+var globalchoices;
 // strings are 55 chars. There are 31 lines
 // This means positions can go from 1 to 26 in x and 1 to 29 in y
 var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -38,11 +38,6 @@ var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 var currentBoard = level1Board; // This lets us reset the level if we need to.
 
 var ghostHouseBounds = [20, 34, 12, 16];
-
-
-var forks = [
-  { position: [12,1], Left:
-];
 
 // Define your ghosts here
 var pacMan = {
@@ -116,7 +111,7 @@ function clearScreen() {
 }
 
 function displayStats() {
-  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives + '   Position:' + pacMan.position [0] + ',' + pacMan.position[1]);
+  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives + '   Position:' + pacMan.position [0] + ',' + pacMan.position[1] + '   ' + globalchoices);
   // console.log(ghosts[0].name + '\'s Position:' + ghosts[0].position [0] + ',' + ghosts[0].position[1]);
 
   // console.log('\nPower-Pellets: ' + powerPellets)
@@ -270,10 +265,17 @@ function killPacMan() {
 // Ghost AI:
 
 function ghostMove(ghost) {
+  var choices = findForks(ghost.position, ghost.direction);
   var target = ghost.target;
-  while (!move(ghost)) {
-    ghost.direction = rotateClockwise(ghost.direction);
+  if (choices.length === 1) {
+    ghost.direction = choices[0];
+  } else {
+    ghost.direction = ghostDecide(ghost.position, ghost.target, choices);
   }
+  // while (!move(ghost)) {
+  //   ghost.direction = rotateClockwise(ghost.direction);
+  // }
+  move(ghost);
 }
 
 function rotateClockwise(direction) {
@@ -308,11 +310,75 @@ function ghostDecide(position, target, directions) {
   var py = position[1];
   var tx = target[0];
   var ty = target[1];
+  var newPosition = nextPosition(px, py, choice);
+  var distance = (Math.abs(tx - newPosition[0]) / 2) + Math.abs(ty - newPosition[1]);
+  var minDistance = distance;
   for (var i = 1; i < directions.length; i++) {
-    
+    var newPosition = nextPosition(px, py, directions[i]);
+    var distance = (Math.abs(tx - newPosition[0]) / 2) + Math.abs(ty - newPosition[1]);
+    if (distance < minDistance) {
+      choice = directions[i];
+      minDistance = distance;
+    }
   }
+  return choice;
 }
 
+function findForks(position, direction) {
+  globalchoices = [];
+  var choices = [];
+  var x = position[0];
+  var y = position[1];
+  switch(direction) {
+    case 'Up':
+      if (currentBoard[y][x - 2] != 'X') {
+        choices.push('Left');
+      }
+      if (currentBoard[y - 1][x] != 'X') {
+        choices.push('Up');
+      }
+      if (currentBoard[y][x + 2] != 'X') {
+        choices.push('Right');
+      }
+      break;
+    case 'Down':
+      if (currentBoard[y][x - 2] != 'X') {
+        choices.push('Left');
+      }
+      if ((currentBoard[y + 1][x] != 'X') && (currentBoard[y + 1][x] != '=')) {
+        choices.push('Down');
+      }
+      if (currentBoard[y][x + 2] != 'X') {
+        choices.push('Right');
+      }
+      break;
+    case 'Right':
+      if ((currentBoard[y + 1][x] != 'X') && (currentBoard[y + 1][x] != '=')) {
+        choices.push('Down');
+      }
+      if (currentBoard[y - 1][x] != 'X') {
+        choices.push('Up');
+      }
+      if (currentBoard[y][x + 2] != 'X') {
+        choices.push('Right');
+      }
+      break;
+      case 'Left':
+        if ((currentBoard[y + 1][x] != 'X') && (currentBoard[y + 1][x] != '=')) {
+          choices.push('Down');
+        }
+        if (currentBoard[y - 1][x] != 'X') {
+          choices.push('Up');
+        }
+        if (currentBoard[y][x + 2] != 'X') {
+          choices.push('Right');
+        }
+        break;
+    globalchoices = choices;
+  }
+  console.log(choices);
+  return choices;
+}
 // Process Player's Input
 function processInput(key) {
   switch(key) {
@@ -322,27 +388,27 @@ function processInput(key) {
       break;
     case 'a':
       pacMan.direction = 'Left';
-      if (move(pacMan)) {
-        eat(pacMan.position);
-      }
+      move(pacMan);
+      eat(pacMan.position);
+      ghostMove(inky);
       break;
     case 'd':
     pacMan.direction = 'Right';
-      if (move(pacMan)) {
-        eat(pacMan.position);
-      }
+      move(pacMan);
+      eat(pacMan.position);
+      ghostMove(inky);
       break;
     case 'w':
       pacMan.direction = 'Up';
-      if (move(pacMan)) {
-        eat(pacMan.position);
-      }
+      move(pacMan);
+      eat(pacMan.position);
+      ghostMove(inky);
       break;
     case 's':
-    pacMan.direction = 'Down';
-      if (move(pacMan)) {
-        eat(pacMan.position);
-      }
+      pacMan.direction = 'Down';
+      move(pacMan);
+      eat(pacMan.position);
+      ghostMove(inky);
       break;
     default:
       console.log('\nInvalid Command!');
