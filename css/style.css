@@ -1,0 +1,16 @@
+body {
+  text-align: center;
+}
+
+ul {
+  padding: 0;
+}
+
+li {
+  list-style-type: none;
+}
+
+.stat{
+  display: inline-block;
+  padding: 0 2em;
+}
