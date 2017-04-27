@@ -4,6 +4,7 @@ var powerPellets = 4;
 var ghostsEaten = 0;
 var fruitThresholds = [170, 100];
 var level = 1;
+var fruitEaten = "";
 // strings are 55 chars. There are 31 lines
 // This means positions can go from 1 to 26 in x and 1 to 29 in y
 var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -191,6 +192,9 @@ function displayBoard() {
   }
 }
 
+function displayBonuses() {
+  console.log(fruitEaten);
+}
 
 function insertCharacter(line, character) {
   return line.substring(0, character.position[0] - 1)
@@ -199,8 +203,7 @@ function insertCharacter(line, character) {
 }
 
 function displayMenu() {
-  console.log('\nCommands:\n');  // each \n creates a new line
-  console.log('a: left, d: right, w: up, s: down, q: quit.');
+  console.log('\nCommands: a: left, d: right, w: up, s: down, q: quit.');
   // console.log('(1) Eat Inky (' + (inky.edible ? 'edible' : 'inedible') + ')');
   // console.log('(2) Eat Blinky (' + (blinky.edible ? 'edible' : 'inedible') + ')');
   // console.log('(3) Eat Pinky (' + (pinky.edible ? 'edible' : 'inedible') + ')');
@@ -279,7 +282,12 @@ function eat(position) {
       pacMan.score += 10;
       eatDot(position);
       break;
+    case ' ':
+      // Do Nothing
+      break;
     default:
+      eatFruit(position);
+      break;
   }
 }
 
@@ -322,6 +330,19 @@ function eatGhost(ghost) {
     console.log('\nCHOMP!\n' + ghost.name + ' (the ' + ghost.colour + ' one) ate YOU!')
     killPacMan();
   }
+}
+
+function eatFruit(position) {
+  var x = position[0];
+  var y = position[1];
+  for (var i = 0; i < bonuses.length; i++) {
+    if (bonuses[i].sprite[1] === currentBoard[y][x]) {
+      pacMan.score += bonuses[i].points;
+      fruitEaten += bonuses[i].sprite;
+      fruitEaten += ' ';
+    }
+  }
+  currentBoard[y] = insertCharacter(currentBoard[y], none);
 }
 
 function killPacMan() {
