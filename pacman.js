@@ -236,6 +236,7 @@ function eatDot(position) {
 function eatPowerPellet() {
   for(var i = 0; i < ghosts.length; i++) {
     ghosts[i].edible = true;
+    ghosts[i].direction = reverse(ghosts[i].direction);
   }
 }
 
@@ -264,11 +265,38 @@ function killPacMan() {
 
 // Ghost AI:
 
+function inHouse(ghost) {
+  x = ghost.position[0];
+  y = ghost.position[1];
+  if (x < ghostHouseBounds[0]) {
+    return false;
+  }
+  if (x > ghostHouseBounds[1]) {
+    return false;
+  }
+  if (y < ghostHouseBounds[2]) {
+    return false;
+  }
+  if (y > ghostHouseBounds[3]) {
+    return false;
+  }
+  return true;
+}
+
 function retarget(ghost) {
-  switch (ghost.character) {
-    case 'Shadow':
+  if (inHouse(ghost)) {
+    // If the ghost is in the ghost house, it's goal is to leave.
+    if (ghost.position[0] < 27) {
+      ghost.target = [26, 11];
+    } else {
+      ghost.target = [28, 11];
+    }
+  } else {
+    switch (ghost.character) {
+      case 'Shadow':
       ghost.target = pacMan.position;
       break;
+    }
   }
 }
 
@@ -289,6 +317,9 @@ function ghostMove(ghost) {
   //   ghost.direction = rotateClockwise(ghost.direction);
   // }
   move(ghost);
+  if (ghost.position == pacMan.position) {
+    eatGhost(ghost);
+  }
 }
 
 function rotateClockwise(direction) {
