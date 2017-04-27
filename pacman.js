@@ -62,7 +62,8 @@ var inky = {
   home: [26, 14],
   target: [48, -2],
   direction: 'Left',
-  sprite: '/I\\'
+  sprite: '/I\\',
+  edibleSprite: '/i\\'
 };
 var blinky = {
   name: 'Blinky',
@@ -73,7 +74,8 @@ var blinky = {
   home: [22,14],
   target: [54, 32],
   direction: 'Right',
-  sprite: '/B\\'
+  sprite: '/B\\',
+  edibleSprite: '/b\\'
 };
 var pinky = {
   name: 'Pinky',
@@ -84,7 +86,8 @@ var pinky = {
   home: [28,14],
   target: [6, -2],
   direction: 'Up',
-  sprite: '/P\\'
+  sprite: '/P\\',
+  edibleSprite: '/p\\'
 };
 var clyde = {
   name: 'Clyde',
@@ -95,7 +98,8 @@ var clyde = {
   home: [32,14],
   target: [0, 32],
   direction: 'Left',
-  sprite: '/C\\'
+  sprite: '/C\\',
+  edibleSprite: '/c\\'
 };
 var ghosts = [inky, blinky, pinky, clyde];
 
@@ -161,6 +165,7 @@ function drawScreen() {
   setTimeout(function() {
     displayStats();
     displayBoard();
+    displayBonuses();
     displayMenu();
     displayPrompt();
   }, 10);
@@ -197,8 +202,12 @@ function displayBonuses() {
 }
 
 function insertCharacter(line, character) {
+  var insert = character.sprite;
+  if (character.edible) {
+    insert = character.edibleSprite;
+  }
   return line.substring(0, character.position[0] - 1)
-       + character.sprite
+       + insert
        + line.substring(character.position[0] + 2, line.length);
 }
 
@@ -270,7 +279,7 @@ function eat(position) {
   var x = position[0];
   var y = position[1];
   for (var i = 0; i < ghosts.length; i++) {
-    if ((x === ghosts[i].position[0]) && (y === ghosts[i].position[1])) {
+    if (samePosition(ghosts[i], pacMan)) {
       eatGhost(ghosts[i]);
     }
   }
@@ -361,9 +370,11 @@ function levelUp() {
   level++;
   pacMan.position = pacMan.home;
   for (i = 1; i < ghosts.length; i++) {
-    ghost[i].position = ghost.home;
+    ghosts[i].position = ghosts[i].home;
+    ghosts[i].edible = false;
   }
   inky.position = [26, 11];
+  inky.edible = false;
   inky.direction = 'Left';
 }
 
@@ -432,9 +443,17 @@ function ghostMove(ghost) {
   //   ghost.direction = rotateClockwise(ghost.direction);
   // }
   move(ghost);
-  if (ghost.position == pacMan.position) {
+  if (samePosition(pacMan, ghost)) {
     eatGhost(ghost);
   }
+}
+
+function samePosition(character1, character2) {
+  var c1x = character1.position[0];
+  var c2x = character2.position[0];
+  var c1y = character1.position[1];
+  var c2y = character2.position[1];
+  return (c1x === c2x) && (c1y === c2y);
 }
 
 function rotateClockwise(direction) {
