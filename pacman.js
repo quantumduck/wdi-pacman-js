@@ -111,7 +111,7 @@ function clearScreen() {
 }
 
 function displayStats() {
-  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives + '   Position:' + pacMan.position [0] + ',' + pacMan.position[1] + '   ' + globalchoices);
+  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives);
   // console.log(ghosts[0].name + '\'s Position:' + ghosts[0].position [0] + ',' + ghosts[0].position[1]);
 
   // console.log('\nPower-Pellets: ' + powerPellets)
