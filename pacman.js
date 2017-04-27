@@ -325,7 +325,6 @@ function ghostDecide(position, target, directions) {
 }
 
 function findForks(position, direction) {
-  globalchoices = [];
   var choices = [];
   var x = position[0];
   var y = position[1];
@@ -364,18 +363,18 @@ function findForks(position, direction) {
       }
       break;
       case 'Left':
-        if ((currentBoard[y + 1][x] != 'X') && (currentBoard[y + 1][x] != '=')) {
-          choices.push('Down');
+        if (currentBoard[y][x - 2] != 'X') {
+          choices.push('Left');
         }
         if (currentBoard[y - 1][x] != 'X') {
           choices.push('Up');
         }
-        if (currentBoard[y][x + 2] != 'X') {
-          choices.push('Right');
+        if ((currentBoard[y + 1][x] != 'X') && (currentBoard[y + 1][x] != '=')) {
+          choices.push('Down');
         }
         break;
-    globalchoices = choices;
   }
+  globalchoices = choices;
   console.log(choices);
   return choices;
 }
