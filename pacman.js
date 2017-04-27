@@ -264,13 +264,26 @@ function killPacMan() {
 
 // Ghost AI:
 
+function retarget(ghost) {
+  switch (ghost.character) {
+    case 'Shadow':
+      ghost.target = pacMan.position;
+      break;
+  }
+}
+
 function ghostMove(ghost) {
   var choices = findForks(ghost.position, ghost.direction);
+  retarget(ghost);
   var target = ghost.target;
   if (choices.length === 1) {
     ghost.direction = choices[0];
   } else {
-    ghost.direction = ghostDecide(ghost.position, ghost.target, choices);
+    if (ghost.edible) {
+      ghost.direction = choices[Math.floor(Math.random() * choices.length)];
+    } else {
+      ghost.direction = ghostDecide(ghost.position, ghost.target, choices);
+    }
   }
   // while (!move(ghost)) {
   //   ghost.direction = rotateClockwise(ghost.direction);
