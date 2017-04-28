@@ -5,6 +5,10 @@ var ghostsEaten = 0;
 var fruitThresholds = [170, 100];
 var level = 1;
 var fruitEaten = "";
+var messageNum = 0;
+var renderTimeout = 10;
+var fruitTimeout = 10000;
+var edibleTimeout =
 // strings are 55 chars. There are 31 lines
 // This means positions can go from 1 to 26 in x and 1 to 29 in y
 var level1Board = ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -50,7 +54,8 @@ var pacMan = {
   position: [26,23],
   home: [26,23],
   direction: 'Left',
-  sprite: '(V)'
+  sprite: '(V)',
+  delay: 100
 };
 
 var inky = {
@@ -64,6 +69,7 @@ var inky = {
   direction: 'Left',
   sprite: '/I\\',
   edibleSprite: '/i\\'
+  delay: 100
 };
 var blinky = {
   name: 'Blinky',
@@ -75,7 +81,8 @@ var blinky = {
   target: [54, 32],
   direction: 'Right',
   sprite: '/B\\',
-  edibleSprite: '/b\\'
+  edibleSprite: '/b\\',
+  delay: 100
 };
 var pinky = {
   name: 'Pinky',
@@ -87,7 +94,8 @@ var pinky = {
   target: [6, -2],
   direction: 'Up',
   sprite: '/P\\',
-  edibleSprite: '/p\\'
+  edibleSprite: '/p\\',
+  delay: 100
 };
 var clyde = {
   name: 'Clyde',
@@ -99,7 +107,8 @@ var clyde = {
   target: [0, 32],
   direction: 'Left',
   sprite: '/C\\',
-  edibleSprite: '/c\\'
+  edibleSprite: '/c\\',
+  delay: 100
 };
 var ghosts = [inky, blinky, pinky, clyde];
 
@@ -161,9 +170,7 @@ var bonuses = [none, cherry, strawberry, orange, orange, apple, apple, pineapple
 
 // Draw the screen functionality
 function drawScreen() {
-  clearScreen();
   setTimeout(function() {
-    displayStats();
     displayBoard();
     displayBonuses();
     displayMenu();
@@ -171,18 +178,21 @@ function drawScreen() {
   }, 10);
 }
 
-function clearScreen() {
-  console.log('\x1Bc');
-}
-
-function displayStats() {
-  console.log('Score: ' + pacMan.score + '     Lives: ' + pacMan.lives + '  Dots: ' + dotsLeft + '  Level: ' + level);
-  // console.log(ghosts[0].name + '\'s Position:' + ghosts[0].position [0] + ',' + ghosts[0].position[1]);
-
-  // console.log('\nPower-Pellets: ' + powerPellets)
+function messageLog(content) {
+  setTimeout(function() {
+    var thisMessageNum = ++messageNum;
+    var tag =  document.querySelector('#message-box');
+    tag.innerText = content;
+    setTimeout(function() {
+      if (messageNum === thisMessageNum) {
+        tag.innerText = '';
+      }
+    }, 500);
+  }, 10);
 }
 
 function displayBoard() {
+  var content = "";
   for (var y = 0; y < currentBoard.length; y++) {
     var line = currentBoard[y];
     for (var i = 0; i < ghosts.length; i++) {
@@ -193,13 +203,12 @@ function displayBoard() {
     if (pacMan.position[1] == y) {
       line = insertCharacter(line, pacMan);
     }
-    console.log(line);
+    content += line;
+    content += '\n';
   }
+  document.querySelector('#game').innerText = content;
 }
 
-function displayBonuses() {
-  console.log(fruitEaten);
-}
 
 function insertCharacter(line, character) {
   var insert = character.sprite;
@@ -209,6 +218,11 @@ function insertCharacter(line, character) {
   return line.substring(0, character.position[0] - 1)
        + insert
        + line.substring(character.position[0] + 2, line.length);
+}
+
+function updateScore(amount) {
+  pacMan.score += amount;
+  document.querySelector('#score').innerText = 'Points: ' + pacMan.score;
 }
 
 function displayMenu() {
@@ -285,10 +299,10 @@ function eat(position) {
   }
   switch (currentBoard[y][x]) {
     case '@':
-      pacMan.score += 40;
+      updateScore(40);
       eatPowerPellet();
     case 'o':
-      pacMan.score += 10;
+      updateScore(10);
       eatDot(position);
       break;
     case ' ':
@@ -303,7 +317,7 @@ function eat(position) {
 function eatDot(position) {
   var x = position[0];
   var y = position[1];
-  console.log('\nChomp!');
+  messageLog('Chomp!');
   currentBoard[y] = currentBoard[y].substring(0,x)
                   + ' '
                   + currentBoard[y].substring(x + 1, currentBoard[y].length);
@@ -330,7 +344,7 @@ function eatPowerPellet() {
 function eatGhost(ghost) {
   if (ghost.edible) {
     ghost.edible = false;
-    pacMan.score += Math.pow(2,ghostsEaten) * 100;
+    updateScore(Math.pow(2,ghostsEaten) * 100);
     ghostsEaten++;
     ghost.position = ghost.home;
     console.log('\nCHOMP!\nYou ate ' + ghost.name + ' (the ' + ghost.character + ' ghost).');
@@ -350,6 +364,7 @@ function eatFruit(position) {
       fruitEaten += bonuses[i].sprite;
       fruitEaten += ' ';
     }
+    setTimeout(function() { document.querySelector('#bonuses').innerText = fruitEaten; }, 10);
   }
   currentBoard[y] = insertCharacter(currentBoard[y], none);
 }
@@ -552,45 +567,7 @@ function findForks(position, direction) {
         }
         break;
   }
-  globalchoices = choices;
-  // console.log(choices);
   return choices;
-}
-
-// Process Player's Input
-function processInput(key) {
-  switch(key) {
-    case '\u0003': // This makes it so CTRL-C will quit the program
-    case 'q':
-      process.exit();
-      break;
-    case 'a':
-      pacMan.direction = 'Left';
-      move(pacMan);
-      eat(pacMan.position);
-      ghostMove(inky);
-      break;
-    case 'd':
-    pacMan.direction = 'Right';
-      move(pacMan);
-      eat(pacMan.position);
-      ghostMove(inky);
-      break;
-    case 'w':
-      pacMan.direction = 'Up';
-      move(pacMan);
-      eat(pacMan.position);
-      ghostMove(inky);
-      break;
-    case 's':
-      pacMan.direction = 'Down';
-      move(pacMan);
-      eat(pacMan.position);
-      ghostMove(inky);
-      break;
-    default:
-      console.log('\nInvalid Command!');
-  }
 }
 
 // Responses:
@@ -598,6 +575,7 @@ function pacManLeft() {
   pacMan.direction = 'Left';
   move(pacMan);
   eat(pacMan.position);
+  setTimeout(drawScreen, 10);
   ghostMove(inky);
 }
 
@@ -605,6 +583,7 @@ function pacManRight() {
   pacMan.direction = 'Right';
   move(pacMan);
   eat(pacMan.position);
+  setTimeout(drawScreen, 10);
   ghostMove(inky);
 }
 
@@ -612,6 +591,7 @@ function pacManDown() {
   pacMan.direction = 'Down';
   move(pacMan);
   eat(pacMan.position);
+  setTimeout(drawScreen, 10);
   ghostMove(inky);
 }
 
@@ -619,6 +599,7 @@ function pacManUp() {
   pacMan.direction = 'Up';
   move(pacMan);
   eat(pacMan.position);
+  setTimeout(drawScreen, 10);
   ghostMove(inky);
 }
 //
@@ -626,22 +607,22 @@ function pacManUp() {
 //
 
 // Setup Input and Output to work nicely in our Terminal
-var stdin = process.stdin;
-stdin.setRawMode(true);
-stdin.resume();
-stdin.setEncoding('utf8');
+// var stdin = process.stdin;
+// stdin.setRawMode(true);
+// stdin.resume();
+// stdin.setEncoding('utf8');
 
 // Draw screen when game first starts
 drawScreen();
 
 // Process input and draw screen each time player enters a key
-stdin.on('data', function(key) {
-  process.stdout.write(key);
-  processInput(key);
-  setTimeout(drawScreen, 10); // The command prompt will flash a message for 300 milliseoncds before it re-draws the screen. You can adjust the 300 number to increase this.
-});
+// stdin.on('data', function(key) {
+//   process.stdout.write(key);
+//   processInput(key);
+//   setTimeout(drawScreen, 10); // The command prompt will flash a message for 300 milliseoncds before it re-draws the screen. You can adjust the 300 number to increase this.
+// });
 
 // Player Quits
-process.on('exit', function() {
-  console.log('\n\nGame Over!\n');
-});
+// process.on('exit', function() {
+//   console.log('\n\nGame Over!\n');
+// });
